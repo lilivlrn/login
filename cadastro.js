@@ -3,23 +3,28 @@
 // 1. CONEXÃO COM SUPABASE
 // ========================================
 
+// URL do seu projeto
 const SUPABASE_URL = "https://nwijkikhscguygidebew.supabase.co";
 
+// Chave pública do projeto
 const SUPABASE_KEY = "sb_publishable_mVAydUc29ZIk3Zizql2waA_XTXk2_0Z";
 
-const banco = window.supabase.createClient(
+// Cria a conexão
+const banco = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
 
 // ========================================
-// 2. ELEMENTOS DO HTML
+// 2. SELECIONANDO ELEMENTOS DO HTML
 // ========================================
 
+// Formulário de cadastro
 const formulario = document.getElementById("formCadastro");
+
+// Campo de mensagem
 const mensagem = document.getElementById("mensagem");
-const botao = document.getElementById("btnCadastrar");
 
 
 // ========================================
@@ -28,35 +33,35 @@ const botao = document.getElementById("btnCadastrar");
 
 formulario.addEventListener("submit", async function(event) {
 
+    // Impede a atualização da página
     event.preventDefault();
 
-    // Captura os dados
+
+    // ========================================
+    // 4. CAPTURANDO OS DADOS
+    // ========================================
+
     const email = document.getElementById("email").value.trim();
+
     const senha = document.getElementById("senha").value;
 
-    // Validação
+
+    // Verifica se os campos estão preenchidos
     if (!email || !senha) {
         mensagem.innerText = "Preencha todos os campos!";
         return;
     }
 
-    if (senha.length < 6) {
-        mensagem.innerText = "A senha precisa ter pelo menos 6 caracteres!";
-        return;
-    }
 
-    // Bloqueia o botão durante o cadastro
-    botao.disabled = true;
-    botao.innerText = "Cadastrando...";
+    // ========================================
+    // 5. CADASTRANDO NO SUPABASE AUTH
+    // ========================================
 
     mensagem.innerText = "Criando sua conta...";
 
     try {
 
-        // ========================================
-        // 4. CADASTRO NO SUPABASE AUTH
-        // ========================================
-
+        // Envia os dados para o sistema de autenticação
         const { data, error } = await banco.auth.signUp({
 
             email: email,
@@ -65,58 +70,48 @@ formulario.addEventListener("submit", async function(event) {
 
         });
 
+
         // ========================================
-        // 5. VERIFICA ERROS
+        // 6. VERIFICANDO ERROS
         // ========================================
 
         if (error) {
 
-            console.error("Erro Supabase:", error);
+            console.error("Erro no cadastro:", error);
 
-            mensagem.innerText = "Erro: " + error.message;
-
-            return;
-        }
-
-        // Verifica se o usuário foi retornado
-        if (!data.user) {
-
-            mensagem.innerText = "Não foi possível criar a conta.";
+            mensagem.innerText = "Erro ao cadastrar: " + error.message;
 
             return;
         }
 
+
         // ========================================
-        // 6. CADASTRO CONCLUÍDO
+        // 7. CADASTRO CONCLUÍDO
         // ========================================
 
-        if (data.session) {
+        if (data.user && !data.session) {
 
             mensagem.innerText =
-                "Cadastro realizado com sucesso! Você já pode entrar.";
+                "Conta criada! Verifique seu e-mail para confirmar o cadastro.";
 
         } else {
 
             mensagem.innerText =
-                "Conta criada! Confira seu email para confirmar o cadastro.";
+                "Usuário cadastrado com sucesso!";
 
         }
 
-        console.log("Usuário criado:", data.user.id);
-
+        // Limpa os campos
         formulario.reset();
+
 
     } catch (erro) {
 
+        // Captura erros inesperados
         console.error("Erro inesperado:", erro);
 
         mensagem.innerText =
-            "Erro de conexão com o Supabase.";
-
-    } finally {
-
-        botao.disabled = false;
-        botao.innerText = "Cadastrar";
+            "Não foi possível conectar ao Supabase.";
 
     }
 
