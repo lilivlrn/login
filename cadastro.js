@@ -1,117 +1,65 @@
 
-// ========================================
-// 1. CONEXÃO COM SUPABASE
-// ========================================
-
-// URL do seu projeto
 const SUPABASE_URL = "https://jehvctivofxtcwsypjgh.supabase.co";
 
-// Chave pública do projeto
-const SUPABASE_KEY = "sb_publishable_noeh4bvWsbMMkNzGcVUCZA_q4ji3Bvc";
+const SUPABASE_KEY = "SUA_CHAVE_PUBLICAVEL";
 
-// Cria a conexão
 const banco = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
-
-// ========================================
-// 2. SELECIONANDO ELEMENTOS DO HTML
-// ========================================
-
-// Formulário de cadastro
 const formulario = document.getElementById("formCadastro");
-
-// Campo de mensagem
 const mensagem = document.getElementById("mensagem");
-
-
-// ========================================
-// 3. EVENTO DE CADASTRO
-// ========================================
 
 formulario.addEventListener("submit", async function(event) {
 
-    // Impede a atualização da página
     event.preventDefault();
 
-
-    // ========================================
-    // 4. CAPTURANDO OS DADOS
-    // ========================================
-
     const email = document.getElementById("email").value.trim();
-
     const senha = document.getElementById("senha").value;
 
-
-    // Verifica se os campos estão preenchidos
     if (!email || !senha) {
         mensagem.innerText = "Preencha todos os campos!";
         return;
     }
 
-
-    // ========================================
-    // 5. CADASTRANDO NO SUPABASE AUTH
-    // ========================================
-
     mensagem.innerText = "Criando sua conta...";
 
     try {
 
-        // Envia os dados para o sistema de autenticação
         const { data, error } = await banco.auth.signUp({
-
             email: email,
-
             password: senha
-
         });
 
-
-        // ========================================
-        // 6. VERIFICANDO ERROS
-        // ========================================
+        console.log("RESPOSTA COMPLETA:", data);
+        console.log("ERRO:", error);
 
         if (error) {
-
-            console.error("Erro no cadastro:", error);
-
-            mensagem.innerText = "Erro ao cadastrar: " + error.message;
-
+            mensagem.innerText = "Erro: " + error.message;
             return;
         }
 
-
-        // ========================================
-        // 7. CADASTRO CONCLUÍDO
-        // ========================================
-
-        if (data.user && !data.session) {
-
-            mensagem.innerText =
-                "Conta criada! Verifique seu e-mail para confirmar o cadastro.";
-
-        } else {
-
-            mensagem.innerText =
-                "Usuário cadastrado com sucesso!";
-
+        if (!data.user) {
+            mensagem.innerText = "O Supabase não retornou um usuário.";
+            return;
         }
 
-        // Limpa os campos
-        formulario.reset();
+        console.log("ID DO USUÁRIO:", data.user.id);
+        console.log("EMAIL:", data.user.email);
+        console.log("SESSÃO:", data.session);
 
+        mensagem.innerText = data.session
+            ? "Conta criada com sucesso!"
+            : "Cadastro recebido! Verifique seu email para confirmar.";
+
+        formulario.reset();
 
     } catch (erro) {
 
-        // Captura erros inesperados
-        console.error("Erro inesperado:", erro);
+        console.error("ERRO INESPERADO:", erro);
 
-        mensagem.innerText =
-            "Não foi possível conectar ao Supabase.";
+        mensagem.innerText = "Erro ao conectar ao Supabase.";
 
     }
 
