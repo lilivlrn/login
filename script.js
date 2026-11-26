@@ -1,13 +1,13 @@
 
-// ========================================
-// 1. CONEXÃO COM SUPABASE
-// ========================================
+ // ========================================
+ // 1. CONEXÃO COM SUPABASE
+ // ========================================
 
 const SUPABASE_URL = "https://nwijkikhscguygidebew.supabase.co";
 
 const SUPABASE_KEY = "sb_publishable_mVAydUc29ZIk3Zizql2waA_XTXk2_0Z";
 
-const banco = supabase.createClient(
+const banco = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
@@ -19,6 +19,7 @@ const banco = supabase.createClient(
 
 const formulario = document.getElementById("formLogin");
 const mensagem = document.getElementById("mensagem");
+const botao = formulario.querySelector('button[type="submit"]');
 
 
 // ========================================
@@ -29,22 +30,27 @@ formulario.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
-    // Captura os dados digitados
     const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value;
 
-    // Verifica se os campos estão preenchidos
+    // ========================================
+    // 4. VALIDAR CAMPOS
+    // ========================================
+
     if (!email || !senha) {
         mensagem.innerText = "Preencha todos os campos!";
         return;
     }
+
+    botao.disabled = true;
+    botao.innerText = "Entrando...";
 
     mensagem.innerText = "Verificando seus dados...";
 
     try {
 
         // ========================================
-        // 4. AUTENTICAÇÃO NO SUPABASE
+        // 5. AUTENTICAÇÃO
         // ========================================
 
         const { data, error } = await banco.auth.signInWithPassword({
@@ -52,20 +58,33 @@ formulario.addEventListener("submit", async function(event) {
             password: senha
         });
 
-        // Se houver erro, interrompe o processo
         if (error) {
             console.error("Erro no login:", error);
-            mensagem.innerText = "Erro ao entrar: " + error.message;
+
+            if (error.message === "Invalid login credentials") {
+                mensagem.innerText = "Email ou senha incorretos!";
+            } else {
+                mensagem.innerText = "Erro ao entrar: " + error.message;
+            }
+
             return;
         }
 
         // ========================================
-        // 5. LOGIN CONFIRMADO
+        // 6. CONFIRMAR SESSÃO
         // ========================================
+
+        if (!data.session || !data.user) {
+            mensagem.innerText = "Não foi possível iniciar sua sessão!";
+            return;
+        }
 
         mensagem.innerText = "Login realizado! Redirecionando...";
 
-        // Aguarda 1 segundo e abre a página inicial
+        // ========================================
+        // 7. REDIRECIONAR
+        // ========================================
+
         setTimeout(function() {
             window.location.href = "inicio.html";
         }, 1000);
@@ -73,7 +92,13 @@ formulario.addEventListener("submit", async function(event) {
     } catch (erro) {
 
         console.error("Erro inesperado:", erro);
+
         mensagem.innerText = "Erro ao conectar ao Supabase!";
+
+    } finally {
+
+        botao.disabled = false;
+        botao.innerText = "Entrar";
 
     }
 
