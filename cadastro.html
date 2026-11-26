@@ -8,7 +8,6 @@
 
     <title>Cadastro - Login System</title>
 
-    <!-- Conecta o CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -20,44 +19,41 @@
 
         <p>Cadastre seu usuário</p>
 
-        <!-- Formulário de cadastro -->
         <form id="formCadastro">
 
-            <!-- Campo de e-mail -->
             <input
                 type="email"
                 id="email"
                 placeholder="Digite seu e-mail"
+                autocomplete="email"
                 required
             >
 
-            <!-- Campo de senha -->
             <input
                 type="password"
                 id="senha"
                 placeholder="Digite sua senha"
+                autocomplete="new-password"
+                minlength="6"
                 required
             >
 
-            <!-- Botão de cadastro -->
-            <button type="submit">
+            <button type="submit" id="btnCadastrar">
                 Cadastrar
             </button>
 
         </form>
 
-        <!-- Mensagem de resposta -->
         <p id="mensagem"></p>
 
-        <!-- Link para voltar ao login -->
-        <a href="index.html">Já possui conta? Entrar</a>
+        <a href="index.html">
+            Já possui conta? Entrar
+        </a>
 
     </div>
 
-    <!-- Biblioteca Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Código JavaScript -->
     <script src="cadastro.js"></script>
 
 </body>
